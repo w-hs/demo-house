@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Page Title</title>
+
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8">
+	<!--<link rel="stylesheet" href="http://code.jquery.com/mobile/[version]/jquery.mobile-[version].min.css" />
+	<script src="http://code.jquery.com/jquery-[version].min.js"></script>
+	<script src="http://code.jquery.com/mobile/[version]/jquery.mobile-[version].min.js"></script>-->
+	
+	<link rel="stylesheet" href="css/themes/default/jquery.mobile-1.4.5.min.css">
+	<link rel="stylesheet" href="css/style.css">
+	<script src="js/jquery.js"></script>
+	<script src="js/jquery.mobile-1.4.5.min.js"></script>
+	
+	<script>
+	
+
+
+
+	$(document).bind("pagecreate", function(event, ui) {
+
+	   /* $('#slider').siblings('.ui-slider').bind('tap', function(event, ui){ makeAjaxChange($(this).siblings('input')); });
+		$('#slider').siblings('.ui-slider a').bind('taphold', function(event, ui){ makeAjaxChange($(this).parent().siblings('input')); */
+		
+
+
+		$( "#infoButton" ).bind( "click", function(event, ui) {
+			$( "#dataWrapper" ).html("");
+$( "#dataWrapper" ).append('<div class="ui-grid-a"><div class="ui-block-a"><div class="ui-bar ui-bar-a" style="height:30px;font-weight:bold;">Device</div></div><div class="ui-block-b"><div class="ui-bar ui-bar-a" style="height:30px;font-weight:bold;">Status</div></div></div>');
+
+
+
+			$.ajax({
+				url: "http://localhost:8080/data/data.json",
+				success: function( data ) {
+					data = JSON.parse(data);
+
+					$.each(data,function(key,val){
+			$( "#dataWrapper" ).append('<div class="ui-grid-a"><div class="ui-block-a"><div class="ui-bar ui-bar-a" style="height:30px">'+key+'</div></div><div class="ui-block-b"><div class="ui-bar ui-bar-a" style="height:30px">'+val+'</div></div></div>');
+				});
+				
+				},
+				error:function(er){
+					alert(er);
+				}
+				
+			});
+
+
+
+
+
+
+		});
+		
+		$( "#slider-s" ).bind( "change", function(event, ui) {
+			 var slider_value=$("#slider-s").slider().val();
+			 var part1 = Math.round(slider_value/60);
+			 var part2 = (slider_value%60);
+			$("#sliderTime").text( "Uhrzeit: "+(part1<10?"0"+part1:part1)+":"+(part2<10?"0"+part2:part2));
+			setTime((part1<10?"0"+part1:part1)+""+(part2<10?"0"+part2:part2));
+		});
+		
+		$('#radio-choice-v-6a').on('click', function( event ){setDay("Montag");});
+		$('#radio-choice-v-6b').on('click', function( event ){setDay("Dienstag");});
+		$('#radio-choice-v-6c').on('click', function( event ){setDay("Mittwoch");});
+		$('#radio-choice-v-6d').on('click', function( event ){setDay("Donnerstag");});
+		$('#radio-choice-v-6e').on('click', function( event ){setDay("Freitag");});
+		$('#radio-choice-v-6f').on('click', function( event ){setDay("Samstag");});
+		$('#radio-choice-v-6g').on('click', function( event ){setDay("Sonntag");});
+		
+		$('#radio-choice-h-2a').on('click', function( event ){setWeather("Regen");});
+		$('#radio-choice-h-2b').on('click', function( event ){setWeather("Sonne");});
+		
+		$('#radio-choice-x-2a').on('click', function( event ){setWind("Kein");});
+		$('#radio-choice-x-2b').on('click', function( event ){setWind("Leicht");});
+		$('#radio-choice-x-2c').on('click', function( event ){setWind("Stark");});
+			
+		
+		var mailLoop = setInterval(function(){ 
+			 load();
+		}, 1000);
+		
+		load();
+			
+
+	});
+	function load()
+	{
+		loadTime();
+		loadDay();
+		loadWind();
+		loadWeather();
+	}
+	
+	function loadTime()
+	{
+		/*$.ajax({
+			url: "http://localhost/getTime",//"http://localhost/getTime",
+			success: function( data ) {
+			
+				$("#slider-s").slider().val("10");
+				$('#slider-s').slider('refresh');
+			}
+		});*/
+
+
+
+		$.ajax({
+			url: "http://localhost:8080/rest/items/time",
+			contentType:"application/json",
+			dataType:"json",
+			success: function( data ) {
+			
+				var stunden = parseInt(parseInt(data.state) / 100);
+
+				var minuten = parseInt(((parseInt(data.state)/100)-stunden)*100);
+
+				
+				$("#slider-s").slider().val(stunden*60+minuten);
+				$('#slider-s').slider('refresh');
+
+				$("#sliderTime").text( "Uhrzeit: "+(stunden<10?"0"+stunden:stunden)+":"+(minuten<10?"0"+minuten:minuten));
+			}
+		});
+
+
+		
+	}
+	
+	function loadDay()
+	{
+		$.ajax({
+			url: "http://localhost:8080/rest/items/day",//"http://localhost/getTime",
+			contentType:"application/json",
+			dataType:"json",
+			success: function( data ) {
+			
+				if(data.state=="Montag")
+				{
+					$("#radio-choice-v-6a").prop("checked", true);
+					$("#radio-choice-v-6b").prop("checked", false);
+					$("#radio-choice-v-6c").prop("checked", false);
+					$("#radio-choice-v-6d").prop("checked", false);
+					$("#radio-choice-v-6e").prop("checked", false);
+					$("#radio-choice-v-6f").prop("checked", false);
+					$("#radio-choice-v-6g").prop("checked", false);
+
+				}
+				if(data.state=="Dienstag")
+				{
+					$("#radio-choice-v-6a").prop("checked", false);
+					$("#radio-choice-v-6b").prop("checked", true);
+					$("#radio-choice-v-6c").prop("checked", false);
+					$("#radio-choice-v-6d").prop("checked", false);
+					$("#radio-choice-v-6e").prop("checked", false);
+					$("#radio-choice-v-6f").prop("checked", false);
+					$("#radio-choice-v-6g").prop("checked", false);
+				}
+				if(data.state=="Mittwoch")
+				{
+					$("#radio-choice-v-6a").prop("checked", false);
+					$("#radio-choice-v-6b").prop("checked", false);
+					$("#radio-choice-v-6c").prop("checked", true);
+					$("#radio-choice-v-6d").prop("checked", false);
+					$("#radio-choice-v-6e").prop("checked", false);
+					$("#radio-choice-v-6f").prop("checked", false);
+					$("#radio-choice-v-6g").prop("checked", false);
+				}
+				if(data.state=="Donnerstag")
+				{
+					$("#radio-choice-v-6a").prop("checked", false);
+					$("#radio-choice-v-6b").prop("checked", false);
+					$("#radio-choice-v-6c").prop("checked", false);
+					$("#radio-choice-v-6d").prop("checked", true);
+					$("#radio-choice-v-6e").prop("checked", false);
+					$("#radio-choice-v-6f").prop("checked", false);
+					$("#radio-choice-v-6g").prop("checked", false);
+				}
+				if(data.state=="Freitag")
+				{
+					$("#radio-choice-v-6a").prop("checked", false);
+					$("#radio-choice-v-6b").prop("checked", false);
+					$("#radio-choice-v-6c").prop("checked", false);
+					$("#radio-choice-v-6d").prop("checked", false);
+					$("#radio-choice-v-6e").prop("checked", true);
+					$("#radio-choice-v-6f").prop("checked", false);
+					$("#radio-choice-v-6g").prop("checked", false);
+				}
+				if(data.state=="Samstag")
+				{
+					$("#radio-choice-v-6a").prop("checked", false);
+					$("#radio-choice-v-6b").prop("checked", false);
+					$("#radio-choice-v-6c").prop("checked", false);
+					$("#radio-choice-v-6d").prop("checked", false);
+					$("#radio-choice-v-6e").prop("checked", false);
+					$("#radio-choice-v-6f").prop("checked", true);
+					$("#radio-choice-v-6g").prop("checked", false);
+				}
+				if(data.state=="Sonntag")
+				{
+					$("#radio-choice-v-6a").prop("checked", false);
+					$("#radio-choice-v-6b").prop("checked", false);
+					$("#radio-choice-v-6c").prop("checked", false);
+					$("#radio-choice-v-6d").prop("checked", false);
+					$("#radio-choice-v-6e").prop("checked", false);
+					$("#radio-choice-v-6f").prop("checked", false);
+					$("#radio-choice-v-6g").prop("checked", true);
+				}
+				$("input[type='radio']").checkboxradio("refresh");
+			}
+		});
+		
+		
+	}
+	
+	function loadWeather()
+	{
+		$.ajax({
+			url: "http://localhost:8080/rest/items/weather",//"http://localhost/getTime",
+			contentType:"application/json",
+			dataType:"json",
+			success: function( data ) {
+			
+				if(data.state=="Regen")
+				{
+					$("#radio-choice-h-2a").prop("checked", true);
+					$("#radio-choice-h-2b").prop("checked", false);
+				}
+				if(data.state=="Sonne")
+				{
+					$("#radio-choice-h-2a").prop("checked", false);
+					$("#radio-choice-h-2b").prop("checked", true);
+				}
+				$("input[type='radio']").checkboxradio("refresh");
+			}
+		});
+	}
+	
+	function loadWind()
+	{
+		$.ajax({
+			url: "http://localhost:8080/rest/items/wind",
+			contentType:"application/json",
+			dataType:"json",
+			success: function( data ) {
+						
+				
+				if(data.state=="Kein")
+				{
+					$("#radio-choice-x-2a").prop("checked", true);
+					$("#radio-choice-x-2b").prop("checked", false);
+					$("#radio-choice-x-2c").prop("checked", false);
+				}
+				if(data.state=="Leicht")
+				{
+					//$("#radio-choice-x-2b").attr("checked", "checked");
+
+					$("#radio-choice-x-2a").prop("checked", false);
+					$("#radio-choice-x-2b").prop("checked", true);
+					$("#radio-choice-x-2c").prop("checked", false);
+				}
+				if(data.state=="Stark")
+				{
+					
+					//$("#radio-choice-x-2c").attr("checked", "checked");
+
+					$("#radio-choice-x-2a").prop("checked", false);
+					$("#radio-choice-x-2b").prop("checked", false);
+					$("#radio-choice-x-2c").prop("checked", true);
+				}
+				$("input[type='radio']").checkboxradio("refresh");
+			}
+		});
+	}
+
+		
+	function setTime(value)
+	{
+		try{
+			
+			$.ajax({
+				url: "http://localhost:8080/CMD?time="+value,
+				async:false,
+				success: function( data ) {
+					
+				}
+			});
+		}
+		catch(ex){}
+	}
+	
+	function setDay(value)
+	{
+	
+	
+		$.ajax({
+			url: "http://localhost:8080/CMD?day="+value,
+			success: function( data ) {
+				
+			}
+		});
+	}
+	
+	function setWeather(value)
+	{
+		
+		$.ajax({
+			url: "http://localhost:8080/CMD?weather="+value,
+			success: function( data ) {
+				
+			}
+		});
+	}
+	
+	function setWind(value)
+	{
+		
+		$.ajax({
+			url: "http://localhost:8080/CMD?wind="+value,
+			async:false,
+			success: function( data ) {
+				
+			}
+		});
+	}
+		
+	</script>
+	
+	
+	
+</head>
+<body>
+
+<div data-role="page">
+
+	<div data-role="header" data-position="fixed">
+		<h1>Master Controll</h1>
+	</div><!-- /header -->
+
+	<div role="main" class="ui-content">
+		
+		
+		
+    <form class="full-width-slider">
+    <label for="slider-s" id="sliderTime" >Uhrzeit: 00:00</label><input type="range" name="slider-s" id="slider-s" value="600" min="0" max="1439" >
+</form>
+
+<form>
+    <fieldset data-role="controlgroup" data-mini="true">
+        <legend>Wochentag:</legend><input type="radio" name="radio-choice-v-6" id="radio-choice-v-6a" value="on" checked="checked"><label for="radio-choice-v-6a">Montag</label>
+<input type="radio" name="radio-choice-v-6" id="radio-choice-v-6b" value="off"><label for="radio-choice-v-6b">Dienstag</label>
+<input type="radio" name="radio-choice-v-6" id="radio-choice-v-6c" value="off"><label for="radio-choice-v-6c">Mittwoch</label>
+<input type="radio" name="radio-choice-v-6" id="radio-choice-v-6d" value="off"><label for="radio-choice-v-6d">Donnerstag</label>
+<input type="radio" name="radio-choice-v-6" id="radio-choice-v-6e" value="off"><label for="radio-choice-v-6e">Freitag</label>
+<input type="radio" name="radio-choice-v-6" id="radio-choice-v-6f" value="off"><label for="radio-choice-v-6f">Samstag</label>
+<input type="radio" name="radio-choice-v-6" id="radio-choice-v-6g" value="off"><label for="radio-choice-v-6g">Sonntag</label>
+    </fieldset>
+
+
+
+    <fieldset data-role="controlgroup" data-type="horizontal">
+        <legend>Wetter:</legend>
+        <input type="radio" name="radio-choice-h-2" id="radio-choice-h-2a" value="on" checked="checked"><label for="radio-choice-h-2a">Regen</label><input type="radio" name="radio-choice-h-2" id="radio-choice-h-2b" value="off"><label for="radio-choice-h-2b">Sonnenschein</label>
+    </fieldset>
+
+<fieldset data-role="controlgroup" data-type="horizontal">
+        <legend>Wind:</legend>
+        <input type="radio" name="radio-choice-x-2" id="radio-choice-x-2a" value="on" checked="checked"><label for="radio-choice-x-2a">Kein</label><input type="radio" name="radio-choice-x-2" id="radio-choice-x-2b" value="off"><label for="radio-choice-x-2b">Leichter</label><input type="radio" name="radio-choice-x-2" id="radio-choice-x-2c" value="off"><label for="radio-choice-x-2c">Starker</label>
+    </fieldset>
+
+
+
+
+	<a href="#popupBasic" data-rel="popup" class="ui-btn ui-corner-all ui-shadow ui-btn-inline" data-transition="pop" id="infoButton" data-position-to="window">Show Server Informationen</a>
+	<div data-role="popup" id="popupBasic" style="width:350px;">
+
+	<div id="dataWrapper"></div>
+
+
+
+	</div>
+
+</form>
+		
+		
+	</div><!-- /content -->
+
+	<div data-role="footer" data-position="fixed">
+		<h4>W-HS</h4>
+	</div><!-- /footer -->
+</div><!-- /page -->
+
+</body>
+</html>
+
